@@ -1,0 +1,1262 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta charset="utf-8">
+<title>DSA 15-Day Visual Book</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: study-book shell. Fixed chapter rail on the left (days → questions), reading column on the right.
+   Each approach carries a "debugger desk": stage (memory pictures) on top, caption + call stack + code below.
+   Highlighter yellow marks "what is happening now"; cobalt marks pointers and links. */
+:root{
+  --bg:#ECEFF3; --surface:#FFFFFF; --surface2:#F5F7FA; --sunk:#E3E8EE;
+  --ink:#121923; --muted:#566170; --faint:#8A95A3; --line:#D3DAE2;
+  --accent:#2350D2; --accent-soft:#DCE5FF; --mark:#FFD84A; --mark-soft:#FFF3BF; --mark-ink:#2E2400;
+  --easy:#17804A; --med:#A86A0C; --hard:#C0322E; --ok:#17804A; --no:#C0322E;
+  --code-bg:#F7F8FA; --code-ink:#1D2633; --code-cm:#6B7787; --code-kw:#8A2BB0; --code-str:#0F7A5A; --code-num:#B5480C;
+  --f-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0D1117; --surface:#151B23; --surface2:#1A222C; --sunk:#10151C;
+  --ink:#E5EAF0; --muted:#9AA6B4; --faint:#6C7886; --line:#2A3440;
+  --accent:#86A6FF; --accent-soft:#1E2A4A; --mark:#E9C640; --mark-soft:#3A3212; --mark-ink:#1C1600;
+  --easy:#4CC489; --med:#E3A945; --hard:#F0716B; --ok:#4CC489; --no:#F0716B;
+  --code-bg:#11171F; --code-ink:#D9E0E8; --code-cm:#7D8A99; --code-kw:#D49BFF; --code-str:#6FD3A6; --code-num:#F2A46B;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0D1117; --surface:#151B23; --surface2:#1A222C; --sunk:#10151C;
+  --ink:#E5EAF0; --muted:#9AA6B4; --faint:#6C7886; --line:#2A3440;
+  --accent:#86A6FF; --accent-soft:#1E2A4A; --mark:#E9C640; --mark-soft:#3A3212; --mark-ink:#1C1600;
+  --easy:#4CC489; --med:#E3A945; --hard:#F0716B; --ok:#4CC489; --no:#F0716B;
+  --code-bg:#11171F; --code-ink:#D9E0E8; --code-cm:#7D8A99; --code-kw:#D49BFF; --code-str:#6FD3A6; --code-num:#F2A46B;
+  color-scheme:dark }
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.6;margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:300px minmax(0,1fr);height:100%}
+
+/* ---------- rail ---------- */
+.rail{background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.brand{padding:18px 18px 12px;border-bottom:1px solid var(--line)}
+.brand b{font-family:var(--f-display);font-weight:800;font-size:21px;letter-spacing:-.01em;display:block;line-height:1.1}
+.brand span{font-size:12.5px;color:var(--muted)}
+.search{padding:10px 14px;border-bottom:1px solid var(--line)}
+.search input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--ink);font:inherit;font-size:14px}
+.days{overflow:auto;flex:1;padding:6px 0 30px}
+.day{border-bottom:1px solid var(--line)}
+.dayhead{display:flex;gap:10px;align-items:baseline;width:100%;text-align:left;background:none;border:0;padding:10px 16px;cursor:pointer}
+.dayhead:hover{background:var(--surface2)}
+.dayhead .dn{font-family:var(--f-mono);font-size:11.5px;color:var(--accent);font-weight:600;flex:none;width:44px}
+.dayhead .dt{font-size:13.5px;font-weight:600;line-height:1.3}
+.qlist{list-style:none;margin:0;padding:0 0 8px}
+.qlist a{display:flex;gap:8px;align-items:baseline;padding:4px 16px 4px 22px;color:var(--ink);text-decoration:none;font-size:13.5px;line-height:1.35}
+.qlist a:hover{background:var(--surface2)}
+.qlist a[aria-current="true"]{background:var(--mark-soft);box-shadow:inset 3px 0 0 var(--mark)}
+.qlist .qn{font-family:var(--f-mono);font-size:11px;color:var(--muted);width:36px;flex:none}
+.dot{width:7px;height:7px;border-radius:50%;flex:none;transform:translateY(-1px)}
+.d-Easy{background:var(--easy)} .d-Medium{background:var(--med)} .d-Hard{background:var(--hard)}
+.railfoot{padding:10px 16px;border-top:1px solid var(--line);display:flex;gap:8px}
+.railfoot button{flex:1;background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:6px;font-size:13px;cursor:pointer}
+
+/* ---------- main ---------- */
+.main{overflow:auto;min-width:0}
+.topbar{display:none}
+.page{max-width:1080px;margin:0 auto;padding-block:28px 80px;padding-left:max(28px, env(safe-area-inset-left,0px));padding-right:max(28px, env(safe-area-inset-right,0px))}
+.eyebrow{font-family:var(--f-mono);font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.eyebrow .pill{border:1px solid var(--line);border-radius:999px;padding:1px 9px;text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:12.5px;color:var(--ink);background:var(--surface)}
+.pill.diff-Easy{color:var(--easy);border-color:currentColor} .pill.diff-Medium{color:var(--med);border-color:currentColor} .pill.diff-Hard{color:var(--hard);border-color:currentColor}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4.2vw,44px);line-height:1.05;letter-spacing:-.02em;margin:10px 0 18px;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:-.01em;margin:0 0 10px;text-wrap:balance}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.prose p{margin:0 0 10px;max-width:72ch}
+.twocol{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px;margin-bottom:22px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;min-width:0}
+.example{font-family:var(--f-mono);font-size:13px;line-height:1.55;background:var(--surface2);border-radius:8px;padding:10px 12px;overflow-x:auto;white-space:pre-wrap;word-break:break-word;margin-top:10px}
+.simple{background:var(--mark-soft);border:1px solid color-mix(in srgb,var(--mark) 55%,transparent);border-radius:var(--r);padding:14px 18px;margin-bottom:22px}
+.simple h3{color:var(--mark-ink);color:color-mix(in srgb,var(--ink) 80%,var(--mark))}
+.simple p{margin:0;max-width:75ch}
+
+/* approach tabs */
+.atabs{display:flex;gap:6px;flex-wrap:wrap;margin:30px 0 0;border-bottom:1px solid var(--line)}
+.atab{border:1px solid transparent;border-bottom:0;background:none;padding:9px 14px 10px;border-radius:10px 10px 0 0;cursor:pointer;text-align:left;margin-bottom:-1px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.atab .k{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.atab .l{font-weight:600;font-size:14.5px}
+.atab[aria-selected="true"]{background:var(--surface);border-color:var(--line)}
+.atab[aria-selected="true"] .k{color:var(--accent)}
+.apanel{background:var(--surface);border:1px solid var(--line);border-top:0;border-radius:0 0 var(--r) var(--r);padding:18px 18px 22px}
+.cx{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.cx span{font-family:var(--f-mono);font-size:12.5px;background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:2px 8px}
+.cx b{font-weight:600;color:var(--accent)}
+.steps{margin:0 0 10px;padding-left:22px}
+.steps li{margin:2px 0;max-width:75ch}
+.why{color:var(--muted);font-size:14.5px;margin:0 0 6px;max-width:75ch}
+.asimple{border-left:3px solid var(--mark);padding:4px 0 4px 12px;margin:0 0 14px;max-width:75ch}
+.asimple b{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block}
+
+/* ---------- player ---------- */
+.player{margin-top:16px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface2)}
+.ptop{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface);flex-wrap:wrap}
+.ptop .ttl{font-weight:600;font-size:13.5px;display:flex;gap:8px;align-items:center;min-width:0}
+.ptop .ttl i{font-style:normal;font-family:var(--f-mono);font-size:12px;color:var(--muted);font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vsel{display:flex;gap:4px}
+.vsel button{border:1px solid var(--line);background:var(--surface2);border-radius:6px;font-size:12px;padding:2px 8px;cursor:pointer}
+.vsel button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.stage{position:relative;padding:14px;min-height:150px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start;background:
+  radial-gradient(circle at 1px 1px, color-mix(in srgb,var(--faint) 35%,transparent) 1px, transparent 1.2px) 0 0/16px 16px, var(--surface2)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px 10px;min-width:0;max-width:100%}
+.panel.chg{border-color:var(--mark);box-shadow:0 0 0 2px var(--mark-soft)}
+.plabel{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.plabel b{color:var(--ink);font-weight:600}
+.plabel em{font-style:normal;color:var(--faint);font-size:11px}
+.scroller{overflow-x:auto;max-width:100%;padding-bottom:2px}
+.vars{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.var{font-family:var(--f-mono);font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 8px;white-space:nowrap;transition:background .25s}
+.var b{font-weight:600}
+.var.chg{background:var(--mark);border-color:var(--mark);color:var(--mark-ink)}
+.var.new{background:var(--mark-soft)}
+/* arrays */
+.arr{position:relative;display:inline-block;padding-bottom:4px;padding-right:28px;padding-left:4px}
+.cells{display:flex}
+.cell{min-width:34px;height:34px;padding:0 6px;border:1px solid var(--line);margin-left:-1px;display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:13px;background:var(--surface);position:relative;white-space:nowrap;transition:background .25s}
+.cell:first-child{margin-left:0;border-radius:6px 0 0 6px}
+.cell:last-child{border-radius:0 6px 6px 0}
+.cell.win{background:var(--accent-soft)}
+.cell.hit{box-shadow:inset 0 0 0 2px var(--accent)}
+.cell.chg{background:var(--mark);color:var(--mark-ink)}
+.cell.dim{color:var(--faint)}
+.cell .ix{position:absolute;top:100%;left:0;right:0;text-align:center;font-style:normal;font-size:9.5px;color:var(--faint);margin-top:1px}
+.cell.chg .ix{color:var(--faint)}
+.ptrs{position:relative;height:0;margin-top:16px}
+.ptr{position:absolute;top:0;transform:translateX(-50%);font-family:var(--f-mono);font-size:11.5px;font-weight:600;color:var(--accent);white-space:nowrap;transition:left .35s cubic-bezier(.3,.7,.3,1);line-height:1;text-align:center}
+.ptr::before{content:"▲";display:block;font-size:8px;margin-bottom:1px}
+.ptr.off{opacity:.55}
+.stack .cells{flex-direction:column-reverse}
+.stack .cell{margin-left:0;margin-top:-1px;border-radius:0!important;min-width:56px}
+.stack .cell:first-child{border-radius:0 0 6px 6px!important}
+.stack .cell:last-child{border-radius:6px 6px 0 0!important}
+.stack .topmark{font-family:var(--f-mono);font-size:10.5px;color:var(--accent);text-align:center}
+/* grid */
+table.grid{border-collapse:collapse;font-family:var(--f-mono);font-size:12.5px}
+table.grid td,table.grid th{border:1px solid var(--line);min-width:30px;height:28px;text-align:center;padding:0 5px;background:var(--surface);transition:background .25s;white-space:nowrap}
+table.grid th{background:none;border:0;color:var(--faint);font-weight:400;font-size:10px;height:16px;min-width:0}
+table.grid td.rowhl,table.grid td.colhl{background:var(--surface2)}
+table.grid td.hit{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+table.grid td.chg{background:var(--mark);color:var(--mark-ink)}
+.gptr{font-family:var(--f-mono);font-size:11px;color:var(--accent);margin-top:4px}
+/* map / set */
+table.map{border-collapse:collapse;font-family:var(--f-mono);font-size:12.5px}
+table.map td{border:1px solid var(--line);padding:3px 8px;background:var(--surface);white-space:nowrap;transition:background .25s}
+table.map td.k{color:var(--muted);background:var(--surface2)}
+table.map tr.chg td{background:var(--mark);color:var(--mark-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;max-width:520px}
+.chip{font-family:var(--f-mono);font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:1px 9px;background:var(--surface)}
+.chip.chg{background:var(--mark);border-color:var(--mark);color:var(--mark-ink)}
+.empty{font-family:var(--f-mono);font-size:12px;color:var(--faint)}
+.objf{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start}
+.objf>.sub{min-width:0;max-width:100%}
+.sublabel{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);margin-bottom:3px}
+/* node diagrams */
+.diagram{position:relative}
+.diagram svg{position:absolute;inset:0;overflow:visible;pointer-events:none}
+.diagram svg path{fill:none;stroke:var(--faint);stroke-width:1.6}
+.diagram svg path.hot{stroke:var(--accent);stroke-width:2.2}
+.diagram svg path.rnd{stroke-dasharray:4 3;stroke:var(--med)}
+.diagram svg text{fill:var(--muted);font-family:var(--f-mono);font-size:10.5px}
+.diagram svg .ah{fill:var(--faint)} .diagram svg .ah.hot{fill:var(--accent)} .diagram svg .ah.rnd{fill:var(--med)}
+.diagram svg path{animation:fadein .3s}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.node{position:absolute;width:38px;height:38px;margin:-19px 0 0 -19px;border-radius:50%;border:1.6px solid var(--ink);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:12.5px;font-weight:600;transition:left .4s cubic-bezier(.3,.7,.3,1),top .4s cubic-bezier(.3,.7,.3,1),background .25s}
+.node.box{border-radius:7px;width:44px;margin-left:-22px}
+.node.wide{width:auto;min-width:44px;padding:0 6px;transform:translateX(-50%);margin-left:0}
+.node.on{background:var(--accent-soft);border-color:var(--accent);border-width:2.2px}
+.node.stk{border-style:dashed;border-color:var(--accent)}
+.node.chg{background:var(--mark);color:var(--mark-ink);border-color:var(--mark-ink)}
+.node.end{box-shadow:inset 0 0 0 3px var(--accent-soft), 0 0 0 0 transparent;border-width:2.4px}
+.node .tags{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;margin-bottom:3px;pointer-events:none}
+.node .tags span{font-size:10.5px;font-weight:600;color:var(--accent);white-space:nowrap;line-height:1.15}
+.nullmark{position:absolute;font-family:var(--f-mono);font-size:10.5px;color:var(--faint);transform:translate(-50%,-50%)}
+
+/* lower half of player */
+.pbody{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);border-top:1px solid var(--line);background:var(--surface)}
+.narr{padding:12px 14px;border-right:1px solid var(--line);min-width:0;display:flex;flex-direction:column;gap:10px}
+.cap{min-height:96px}
+.cap .lineno{font-family:var(--f-mono);font-size:11.5px;color:var(--muted)}
+.cap ul{list-style:none;padding:0;margin:6px 0 0;display:flex;flex-direction:column;gap:5px}
+.cap li{font-size:14.5px;line-height:1.45}
+.cap code{font-family:var(--f-mono);font-size:12.5px;background:var(--surface2);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+.cap .yes{color:var(--ok);font-weight:600} .cap .no{color:var(--no);font-weight:600}
+.cap .say{color:var(--muted);font-style:italic}
+.cap .done{background:var(--mark-soft);border-radius:6px;padding:6px 10px;font-weight:600}
+.callstack{font-family:var(--f-mono);font-size:12px}
+.callstack .fr{padding:3px 8px;border:1px solid var(--line);border-radius:6px;margin-top:-1px;background:var(--surface2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.callstack .fr.top{background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+.codewrap{min-width:0;display:flex;flex-direction:column}
+.ctabs{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line)}
+.ctabs button{border:0;background:none;padding:4px 10px 6px;font-size:12.5px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent}
+.ctabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.ctabs .copy{margin-left:auto}
+pre.code{margin:0;font-family:var(--f-mono);font-size:12.5px;line-height:1.6;background:var(--code-bg);color:var(--code-ink);overflow:auto;max-height:380px;padding:8px 0;counter-reset:ln;tab-size:4}
+pre.code .ln{display:block;padding:0 12px 0 0;white-space:pre;min-width:max-content}
+pre.code .ln::before{counter-increment:ln;content:counter(ln);display:inline-block;width:34px;text-align:right;margin-right:12px;color:var(--faint);font-size:11px}
+pre.code .ln.cur{background:var(--mark);color:var(--mark-ink)}
+pre.code .ln.cur *{color:var(--mark-ink)!important}
+pre.code .ln.cur::before{color:var(--mark-ink)}
+.tk-c{color:var(--code-cm);font-style:italic}.tk-k{color:var(--code-kw)}.tk-s{color:var(--code-str)}.tk-n{color:var(--code-num)}
+/* controls */
+.controls{display:flex;align-items:center;gap:8px;padding:9px 12px;border-top:1px solid var(--line);background:var(--surface);flex-wrap:wrap}
+.cbtn{width:34px;height:32px;border:1px solid var(--line);border-radius:7px;background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+.cbtn svg{width:15px;height:15px;fill:currentColor}
+.cbtn.play{background:var(--ink);color:var(--surface);border-color:var(--ink);width:42px}
+.scrub{flex:1;min-width:120px;accent-color:var(--accent)}
+.stepn{font-family:var(--f-mono);font-size:12px;color:var(--muted);min-width:76px;text-align:right;font-variant-numeric:tabular-nums}
+.speed{font:inherit;font-size:12.5px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);padding:3px 4px}
+.notrace{padding:16px;color:var(--muted);font-size:14px}
+.trunc{font-size:12px;color:var(--muted);padding:0 14px 8px}
+
+.notes{margin-top:28px}
+.notes ul{padding-left:18px;margin:0}
+.notes li{margin:6px 0;max-width:80ch}
+.notes li b{font-weight:600}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:30px}
+.pager a{flex:1;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:12px 14px;text-decoration:none;color:var(--ink);min-width:0}
+.pager a small{display:block;color:var(--muted);font-family:var(--f-mono);font-size:11px}
+.pager a.next{text-align:right}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:6px 12px;border-top:1px solid var(--line);background:var(--surface)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+/* plan view */
+.plan{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:18px}
+.plan a{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;text-decoration:none;color:var(--ink);display:flex;flex-direction:column;gap:4px}
+.plan a:hover{border-color:var(--accent)}
+.plan .dn{font-family:var(--f-mono);font-size:12px;color:var(--accent)}
+.plan .dt{font-family:var(--f-display);font-weight:700;font-size:18px;line-height:1.2}
+.plan .dc{font-size:13px;color:var(--muted)}
+.loading{padding:60px 0;color:var(--muted)}
+
+@media (max-width: 900px){
+  .app{grid-template-columns:1fr}
+  .rail{position:fixed;inset:0 auto 0 0;width:min(320px,88vw);z-index:20;transform:translateX(-105%);transition:transform .25s;box-shadow:0 10px 40px rgba(0,0,0,.25);padding-top:env(safe-area-inset-top,0px);padding-left:env(safe-area-inset-left,0px)}
+  .rail.open{transform:none}
+  .topbar{display:flex;position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--surface);border-bottom:1px solid var(--line);padding-block:8px;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px));align-items:center;gap:10px}
+  .topbar button{border:1px solid var(--line);background:var(--surface2);border-radius:8px;padding:5px 10px;font-size:13px}
+  .topbar b{font-family:var(--f-display);font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .page{padding-block:18px 60px;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+  .twocol{grid-template-columns:1fr}
+  .pbody{grid-template-columns:1fr}
+  .narr{border-right:0;border-bottom:1px solid var(--line)}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:15}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+</style>
+
+<div class="app">
+  <nav class="rail" id="rail" aria-label="Chapters">
+    <div class="brand"><b>DSA 15-Day Visual Book</b><span>269 questions · every approach animated</span></div>
+    <div class="search"><input id="q" type="search" placeholder="Search questions or patterns" aria-label="Search questions"></div>
+    <div class="days" id="days"></div>
+    <div class="railfoot"><button id="planBtn" type="button">15-day plan</button><button id="themeBtn" type="button">Theme</button></div>
+  </nav>
+  <div class="scrim" id="scrim" hidden></div>
+  <main class="main" id="main">
+    <div class="topbar"><button id="menuBtn" type="button" aria-label="Open chapters">☰ Chapters</button><b id="topTitle">DSA 15-Day Visual Book</b></div>
+    <div class="page" id="page"><div class="loading">Loading the book…</div></div>
+  </main>
+</div>
+
+<script>
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+
+let INDEX = null;
+const DAYCACHE = {};
+let CUR = null; // current question id
+let player = null;
+
+/* ================= theme ================= */
+(function () {
+  const t = store.get("dsa-theme");
+  if (t) document.documentElement.setAttribute("data-theme", t);
+  $("#themeBtn").onclick = () => {
+    const cur = document.documentElement.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const nx = cur === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", nx);
+    store.set("dsa-theme", nx);
+  };
+})();
+
+/* ================= data loading ================= */
+async function loadIndex() {
+  const r = await fetch("data/index.json");
+  INDEX = await r.json();
+}
+async function loadDay(day) {
+  if (DAYCACHE[day]) return DAYCACHE[day];
+  const r = await fetch("data/day" + String(day).padStart(2, "0") + ".json");
+  const qs = await r.json();
+  DAYCACHE[day] = qs;
+  return qs;
+}
+
+/* ================= rail ================= */
+function renderRail(filter) {
+  const f = (filter || "").trim().toLowerCase();
+  const host = $("#days");
+  const open = new Set((store.get("dsa-open") || "").split(",").filter(Boolean));
+  if (CUR) open.add(String(CUR.split(".")[0]));
+  let html = "";
+  for (const d of INDEX.days) {
+    const qs = INDEX.questions.filter((q) => q.day === d.day && (!f || (q.id + " " + q.title + " " + q.pattern).toLowerCase().includes(f)));
+    if (f && !qs.length) continue;
+    const isOpen = f || open.has(String(d.day));
+    html += `<div class="day"><button class="dayhead" type="button" data-day="${d.day}" aria-expanded="${!!isOpen}"><span class="dn">DAY ${String(d.day).padStart(2, "0")}</span><span class="dt">${esc(d.title)}</span></button>`;
+    if (isOpen) {
+      html += `<ul class="qlist">` + qs.map((q) => `<li><a href="#q${q.id.replace(".", "-")}" data-id="${q.id}" ${q.id === CUR ? 'aria-current="true"' : ""}><span class="qn">${q.id}</span><span class="dot d-${q.difficulty}" title="${q.difficulty}"></span><span>${esc(q.title)}</span></a></li>`).join("") + `</ul>`;
+    }
+    html += `</div>`;
+  }
+  host.innerHTML = html || `<p class="empty" style="padding:16px">No question matches “${esc(f)}”.</p>`;
+}
+$("#days").addEventListener("click", (e) => {
+  const h = e.target.closest(".dayhead");
+  if (h) {
+    const open = new Set((store.get("dsa-open") || "").split(",").filter(Boolean));
+    const k = h.dataset.day;
+    if (h.getAttribute("aria-expanded") === "true") open.delete(k); else open.add(k);
+    store.set("dsa-open", [...open].join(","));
+    renderRail($("#q").value);
+  }
+  if (e.target.closest("a")) closeRail();
+});
+$("#q").addEventListener("input", (e) => renderRail(e.target.value));
+$("#planBtn").onclick = () => { location.hash = "plan"; closeRail(); };
+$("#menuBtn").onclick = () => { $("#rail").classList.add("open"); $("#scrim").hidden = false; };
+$("#scrim").onclick = closeRail;
+function closeRail() { $("#rail").classList.remove("open"); $("#scrim").hidden = true; }
+
+/* ================= routing ================= */
+window.addEventListener("hashchange", route);
+async function route() {
+  const h = location.hash.slice(1);
+  const m = h.match(/^q(\d+)-(\d+)$/);
+  if (m) return showQuestion(m[1] + "." + m[2]);
+  if (h === "plan") return showPlan();
+  const last = store.get("dsa-last");
+  return showQuestion(last && INDEX.questions.some((q) => q.id === last) ? last : "1.1");
+}
+
+function showPlan() {
+  CUR = null;
+  if (player) player.stop();
+  renderRail($("#q").value);
+  $("#topTitle").textContent = "15-day plan";
+  const counts = {};
+  for (const q of INDEX.questions) counts[q.day] = (counts[q.day] || 0) + 1;
+  $("#page").innerHTML = `
+    <div class="eyebrow">NeetCode 150 + Striver sheet</div>
+    <h1>The 15-day plan</h1>
+    <div class="prose"><p>One day is one chapter. Every question has the same shape: the problem with one worked example, the idea that unlocks it, then each approach from brute force to optimal. Every approach comes with a step-by-step animation that runs the book's JavaScript on the example, so you can watch the arrays, pointers, maps, lists and trees change line by line.</p>
+    <p>Try a question for 15 to 20 minutes before reading the solution. If you are stuck, read only the intuition and try again. Afterwards, close the page and write the optimal solution from memory.</p></div>
+    <div class="plan">${INDEX.days.map((d) => `<a href="#q${d.day}-1"><span class="dn">DAY ${String(d.day).padStart(2, "0")} · ${counts[d.day]} questions</span><span class="dt">${esc(d.title)}</span><span class="dc">${esc((d.intro || "").split(". ").slice(0, 1).join(". "))}.</span></a>`).join("")}</div>`;
+  $("#main").scrollTop = 0;
+}
+
+/* ================= question page ================= */
+function paras(arr) { return (arr || []).map((p) => `<p>${esc(p)}</p>`).join(""); }
+const KIND = (label) => /brute/i.test(label) ? "Brute force" : /better/i.test(label) ? "Better" : /optimal/i.test(label) ? "Optimal" : "Approach";
+function subLabel(label) { const m = label.match(/\((.*)\)/); return m ? m[1] : KIND(label); }
+
+async function showQuestion(id) {
+  const meta = INDEX.questions.find((q) => q.id === id);
+  if (!meta) return showPlan();
+  CUR = id;
+  store.set("dsa-last", id);
+  renderRail($("#q").value);
+  const a = document.querySelector(`.qlist a[data-id="${id}"]`);
+  if (a) a.scrollIntoView({ block: "nearest" });
+  $("#topTitle").textContent = id + " " + meta.title;
+  if (!DAYCACHE[meta.day]) $("#page").innerHTML = `<div class="loading">Loading Day ${meta.day}…</div>`;
+  const qs = await loadDay(meta.day);
+  if (CUR !== id) return;
+  const q = qs.find((x) => x.id === id);
+  const all = INDEX.questions;
+  const k = all.findIndex((x) => x.id === id);
+  const prev = all[k - 1], next = all[k + 1];
+  const exLines = (q.example || []).join("\n");
+  const notes = (q.notes || []).map((n) => {
+    const m = n.match(/^([A-Z][^:]{1,30}):\s*(.*)$/);
+    return `<li>${m ? `<b>${esc(m[1])}:</b> ${esc(m[2])}` : esc(n)}</li>`;
+  }).join("");
+  const savedTab = +(store.get("dsa-tab-" + id) || q.approaches.length - 1);
+  const tab = Math.min(savedTab, q.approaches.length - 1);
+  $("#page").innerHTML = `
+    <div class="eyebrow"><span>Day ${String(q.day).padStart(2, "0")} · ${q.id}</span><span class="pill diff-${esc(q.difficulty)}">${esc(q.difficulty)}</span><span class="pill">${esc(q.pattern)}</span><span>${esc(q.source)}</span></div>
+    <h1>${esc(q.title)}</h1>
+    ${q.simple ? `<div class="simple"><h3>In simple words</h3><p>${esc(q.simple)}</p></div>` : ""}
+    <div class="twocol">
+      <div class="box prose"><h3>Problem</h3>${paras(q.problem)}<div class="example">${esc(exLines)}</div></div>
+      <div class="box prose"><h3>Intuition</h3>${paras(q.intuition)}</div>
+    </div>
+    <h2>Approaches</h2>
+    <div class="atabs" role="tablist">${q.approaches.map((ap, i) => `<button class="atab" role="tab" type="button" data-i="${i}" aria-selected="${i === tab}"><span class="k">${i + 1} · ${KIND(ap.label)}</span><span class="l">${esc(ap.time || "")}</span></button>`).join("")}</div>
+    <div class="apanel" id="apanel"></div>
+    ${notes ? `<section class="notes box"><h3>Interview notes</h3><ul>${notes}</ul></section>` : ""}
+    <nav class="pager">${prev ? `<a href="#q${prev.id.replace(".", "-")}"><small>← ${prev.id}</small>${esc(prev.title)}</a>` : "<span></span>"}${next ? `<a class="next" href="#q${next.id.replace(".", "-")}"><small>${next.id} →</small>${esc(next.title)}</a>` : "<span></span>"}</nav>`;
+  document.querySelectorAll(".atab").forEach((b) => (b.onclick = () => {
+    document.querySelectorAll(".atab").forEach((x) => x.setAttribute("aria-selected", x === b));
+    store.set("dsa-tab-" + id, b.dataset.i);
+    renderApproach(q, +b.dataset.i);
+  }));
+  renderApproach(q, tab);
+  $("#main").scrollTop = 0;
+}
+
+function renderApproach(q, i) {
+  const ap = q.approaches[i];
+  const host = $("#apanel");
+  host.innerHTML = `
+    <h2 style="margin-bottom:6px">${esc(KIND(ap.label))}${/\(/.test(ap.label) ? ` <span style="font-weight:500;color:var(--muted);font-size:17px">· ${esc(subLabel(ap.label))}</span>` : ""}</h2>
+    <div class="cx">${ap.time ? `<span>Time <b>${esc(ap.time)}</b></span>` : ""}${ap.space ? `<span>Space <b>${esc(ap.space)}</b></span>` : ""}</div>
+    ${ap.simple ? `<div class="asimple"><b>Plain English</b>${esc(ap.simple)}</div>` : ""}
+    ${ap.lead ? `<p class="why" style="color:var(--ink)">${esc(ap.lead)}</p>` : ""}
+    ${ap.steps && ap.steps.length ? `<ol class="steps">${ap.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>` : ""}
+    ${ap.why ? `<p class="why">${esc(ap.why)}</p>` : ""}
+    ${(ap.extra || []).map((x) => `<p class="why">${esc(x)}</p>`).join("")}
+    <div id="playerHost"></div>`;
+  if (player) player.stop();
+  player = new Player($("#playerHost"), q, ap);
+}
+
+/* ================= syntax highlight ================= */
+const KW = new Set("var let const function return if else for while do break continue new class this of in true false null undefined typeof instanceof switch case default throw try catch finally static extends super int long double float boolean char void public private protected final import String List Map Set HashMap HashSet ArrayList Integer Deque ArrayDeque Queue LinkedList PriorityQueue Arrays Collections Math Character StringBuilder".split(" "));
+function highlight(line) {
+  let out = "", i = 0;
+  const n = line.length;
+  while (i < n) {
+    const ch = line[i];
+    if (ch === "/" && line[i + 1] === "/") { out += `<span class="tk-c">${esc(line.slice(i))}</span>`; break; }
+    if (ch === '"' || ch === "'" || ch === "`") {
+      let j = i + 1;
+      while (j < n && line[j] !== ch) { if (line[j] === "\\") j++; j++; }
+      out += `<span class="tk-s">${esc(line.slice(i, j + 1))}</span>`; i = j + 1; continue;
+    }
+    if (/[0-9]/.test(ch) && !/[\w]/.test(line[i - 1] || "")) {
+      let j = i; while (j < n && /[0-9.xa-fA-FeL_]/.test(line[j])) j++;
+      out += `<span class="tk-n">${esc(line.slice(i, j))}</span>`; i = j; continue;
+    }
+    if (/[A-Za-z_$]/.test(ch)) {
+      let j = i; while (j < n && /[\w$]/.test(line[j])) j++;
+      const w = line.slice(i, j);
+      out += KW.has(w) ? `<span class="tk-k">${w}</span>` : esc(w); i = j; continue;
+    }
+    out += esc(ch); i++;
+  }
+  return out;
+}
+function codeHTML(src) { return src.split("\n").map((l) => `<span class="ln">${highlight(l) || " "}</span>`).join(""); }
+
+/* ================= value helpers ================= */
+const isRef = (v) => v !== null && typeof v === "object" && "r" in v;
+function primStr(v, bare) {
+  if (v === null) return "null";
+  if (typeof v === "object") { if ("u" in v) return "undefined"; if ("n" in v) return v.n === "Infinity" ? "∞" : v.n === "-Infinity" ? "−∞" : v.n; }
+  if (typeof v === "string") return bare ? (v === "" ? "''" : v) : JSON.stringify(v);
+  if (typeof v === "number" && Math.abs(v) >= 1e15) return v.toExponential(2);
+  if (v === 2147483647) return "INT_MAX";
+  if (v === -2147483648) return "INT_MIN";
+  return String(v);
+}
+const NODE_FIELDS = ["left", "right", "next", "prev", "bottom", "child", "random", "neighbors", "children", "links"];
+function nodeKind(o, heap) {
+  if (!o || o.t !== "o") return null;
+  const f = o.f;
+  if ("left" in f && "right" in f) return "tree";
+  if ("children" in f || "links" in f) return "trie";
+  if ("neighbors" in f) return "graph";
+  if ("next" in f && isRef(f.next)) {
+    const nx = heap[f.next.r];
+    if (nx && (nx.t === "m" || (nx.t === "o" && !nx.c && !("next" in nx.f) && !("val" in nx.f)) || (nx.t === "a" && (nx.v.length === 26 || nx.v.length === 2) && !("val" in f)))) return "trie";
+  }
+  if ("next" in f || "bottom" in f || "prev" in f) return "list";
+  if (!o.c) { const ks = Object.keys(f); if (ks.length && ks.every((k) => k.length === 1 || /^(end|isEnd|\$|word|count|cnt)$/.test(k)) && ks.some((k) => k.length === 1)) return "trie"; }
+  return null;
+}
+function nodeLabel(o) {
+  const f = o.f;
+  const pv = (x) => (isRef(x) ? "·" : primStr(x, true));
+  if ("key" in f && "val" in f && !isRef(f.key)) return pv(f.key) + ":" + pv(f.val);
+  if ("val" in f) return pv(f.val);
+  if ("data" in f) return pv(f.data);
+  if ("value" in f) return pv(f.value);
+  return "";
+}
+function brief(v, heap, d = 0) {
+  if (!isRef(v)) return primStr(v);
+  const o = heap[v.r];
+  if (!o) return "…";
+  if (o.t === "a") {
+    if (d > 1) return "[…]";
+    const items = o.v.slice(0, 8).map((x) => brief(x, heap, d + 1));
+    return "[" + items.join(", ") + (o.v.length > 8 || o.n ? ", …" : "") + "]";
+  }
+  if (o.t === "m") return d > 0 ? `Map(${o.n || o.e.length})` : "{" + o.e.slice(0, 4).map(([k, x]) => brief(k, heap, 2) + "→" + brief(x, heap, 2)).join(", ") + (o.e.length > 4 ? ", …" : "") + "}";
+  if (o.t === "s") return d > 1 ? `Set(${o.n || o.v.length})` : "{" + o.v.slice(0, 6).map((x) => brief(x, heap, 2)).join(", ") + (o.v.length > 6 ? ", …" : "") + "}";
+  const nk = nodeKind(o, heap);
+  if (nk) { const l = nodeLabel(o); return l !== "" ? (nk === "tree" || nk === "list" ? "(" + l + ")" : "node " + l) : "node"; }
+  if (o.c) return o.c;
+  const ks = Object.keys(o.f);
+  if (d > 0) return "{…}";
+  return "{" + ks.slice(0, 3).map((k) => k + ": " + brief(o.f[k], heap, 2)).join(", ") + (ks.length > 3 ? ", …" : "") + "}";
+}
+function cellText(v, heap) {
+  if (!isRef(v)) return primStr(v, true);
+  return brief(v, heap, 1);
+}
+const isPrimArr = (o) => o && o.t === "a" && o.v.every((x) => !isRef(x));
+
+/* ================= Player ================= */
+const ICON = {
+  first: '<svg viewBox="0 0 16 16"><path d="M3 2h2v12H3zM14 2v12L6 8z"/></svg>',
+  prev: '<svg viewBox="0 0 16 16"><path d="M12 2v12L4 8z"/></svg>',
+  next: '<svg viewBox="0 0 16 16"><path d="M4 2v12l8-6z"/></svg>',
+  last: '<svg viewBox="0 0 16 16"><path d="M11 2h2v12h-2zM2 2v12l8-6z"/></svg>',
+  play: '<svg viewBox="0 0 16 16"><path d="M4 2v12l10-6z"/></svg>',
+  pause: '<svg viewBox="0 0 16 16"><path d="M3 2h4v12H3zM9 2h4v12H9z"/></svg>',
+};
+const WINDOW_PAIRS = [["l", "r"], ["left", "right"], ["lo", "hi"], ["low", "high"], ["start", "end"], ["L", "R"], ["s", "e"]];
+const STACKY = /^(stack|st|stk|stck|s1|s2|minStack|mins|incoming|outgoing|path|res?Stack)$/i;
+
+class Player {
+  constructor(host, q, ap) {
+    this.host = host; this.q = q; this.ap = ap; this.vi = 0; this.k = 0; this.timer = null;
+    this.speed = +(store.get("dsa-speed") || 700);
+    this.codeLang = "js";
+    this.posMemo = {};
+    this.build();
+  }
+  stop() { if (this.timer) { clearInterval(this.timer); this.timer = null; } }
+  build() {
+    const ap = this.ap;
+    const vbtn = ap.code.length > 1 ? `<div class="vsel">${ap.code.map((c, i) => `<button type="button" data-v="${i}" aria-pressed="${i === this.vi}">${esc(this.variantName(c, i))}</button>`).join("")}</div>` : "";
+    this.host.innerHTML = `
+      <div class="player">
+        <div class="ptop"><div class="ttl">Watch it run <i id="pex"></i></div>${vbtn}</div>
+        <div class="stage" id="stage" aria-live="off"></div>
+        <div class="legend"><span><i style="background:var(--mark)"></i>changed in this step</span><span><i style="background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)"></i>pointer / current cell</span><span><i style="background:var(--surface2);border:1px solid var(--line)"></i>window between pointers</span></div>
+        <div class="controls">
+          <button class="cbtn" type="button" data-a="first" aria-label="First step">${ICON.first}</button>
+          <button class="cbtn" type="button" data-a="prev" aria-label="Previous step">${ICON.prev}</button>
+          <button class="cbtn play" type="button" data-a="play" aria-label="Play">${ICON.play}</button>
+          <button class="cbtn" type="button" data-a="next" aria-label="Next step">${ICON.next}</button>
+          <button class="cbtn" type="button" data-a="last" aria-label="Last step">${ICON.last}</button>
+          <input class="scrub" id="scrub" type="range" min="0" value="0" aria-label="Step">
+          <span class="stepn" id="stepn"></span>
+          <select class="speed" id="speed" aria-label="Speed"><option value="1400">0.5×</option><option value="700">1×</option><option value="350">2×</option><option value="150">4×</option></select>
+        </div>
+        <div class="pbody">
+          <div class="narr"><div class="cap" id="cap" aria-live="polite"></div><div><h3 style="margin-bottom:4px">Call stack</h3><div class="callstack" id="cs"></div></div></div>
+          <div class="codewrap">
+            <div class="ctabs" role="tablist"><button type="button" data-l="js" aria-selected="true">JavaScript (running)</button><button type="button" data-l="java" aria-selected="false">Java</button><button type="button" class="copy" data-l="copy">Copy</button></div>
+            <pre class="code" id="code"></pre>
+          </div>
+        </div>
+        <div class="trunc" id="trunc" hidden></div>
+      </div>`;
+    const h = this.host;
+    h.querySelectorAll(".vsel button").forEach((b) => (b.onclick = () => { this.vi = +b.dataset.v; this.stop(); this.build(); }));
+    h.querySelectorAll(".cbtn").forEach((b) => (b.onclick = () => this.act(b.dataset.a)));
+    $("#speed", h).value = String(this.speed);
+    $("#speed", h).onchange = (e) => { this.speed = +e.target.value; store.set("dsa-speed", this.speed); if (this.timer) { this.stop(); this.play(); } };
+    $("#scrub", h).oninput = (e) => { this.stop(); this.setPlayIcon(); this.go(+e.target.value); };
+    h.querySelectorAll(".ctabs button").forEach((b) => (b.onclick = () => {
+      if (b.dataset.l === "copy") {
+        const txt = this.ap.code[this.vi][this.codeLang];
+        const done = () => { b.textContent = "Copied"; setTimeout(() => (b.textContent = "Copy"), 1200); };
+        try { navigator.clipboard.writeText(txt).then(done, () => { b.textContent = "Select and copy"; }); } catch (e) { b.textContent = "Select and copy"; }
+        return;
+      }
+      this.codeLang = b.dataset.l;
+      h.querySelectorAll(".ctabs button[data-l='js'],.ctabs button[data-l='java']").forEach((x) => x.setAttribute("aria-selected", x === b));
+      this.renderCode(); this.highlightLine();
+    }));
+    this.h = h;
+    this.load();
+    h.querySelector(".player").addEventListener("keydown", (e) => {
+      if (e.target.tagName === "INPUT" && e.target.type !== "range") return;
+      if (e.key === "ArrowRight") { e.preventDefault(); this.act("next"); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); this.act("prev"); }
+    });
+  }
+  variantName(c, i) {
+    const m = (c.js || "").match(/^\s*\/\/\s*(.{3,40})/);
+    return m ? m[1].replace(/[.:]$/, "") : "Version " + (i + 1);
+  }
+  load() {
+    const c = this.ap.code[this.vi];
+    this.tr = c.trace;
+    this.renderCode();
+    const ex = (this.q.example || []).find((l) => /^Input/.test(l));
+    $("#pex", this.h).textContent = ex ? "· " + ex.replace(/^Input:\s*/, "") : "";
+    if (!this.tr) {
+      $("#stage", this.h).innerHTML = `<div class="notrace">This version has no animation. Read the steps above and the code below.</div>`;
+      this.h.querySelector(".controls").hidden = true;
+      return;
+    }
+    const steps = this.tr.s;
+    this.heaps = [];
+    let hp = {};
+    for (const s of steps) { if (s.h) hp = Object.assign({}, hp, s.h); this.heaps.push(hp); }
+    this.layoutOrder = new Map();
+    $("#scrub", this.h).max = String(steps.length - 1);
+    if (this.tr.t) { const t = $("#trunc", this.h); t.hidden = false; t.textContent = `The animation shows the first ${steps.length} steps. The full run on this example is longer; the code keeps going the same way.`; }
+    this.go(0);
+  }
+  renderCode() {
+    const c = this.ap.code[this.vi];
+    $("#code", this.h).innerHTML = codeHTML(this.codeLang === "js" ? c.js : c.java || "");
+  }
+  highlightLine() {
+    const pre = $("#code", this.h);
+    pre.querySelectorAll(".ln.cur").forEach((x) => x.classList.remove("cur"));
+    if (this.codeLang !== "js" || !this.tr) return;
+    const st = this.tr.s[this.k];
+    if (!st.l) return;
+    const ln = pre.children[st.l - 1];
+    if (!ln) return;
+    ln.classList.add("cur");
+    const top = ln.offsetTop - pre.offsetTop;
+    if (top < pre.scrollTop + 20 || top > pre.scrollTop + pre.clientHeight - 40) pre.scrollTop = Math.max(0, top - pre.clientHeight / 3);
+  }
+  act(a) {
+    const n = this.tr ? this.tr.s.length : 0;
+    if (a === "play") { if (this.timer) this.stop(); else { if (this.k >= n - 1) this.go(0); this.play(); } this.setPlayIcon(); return; }
+    this.stop(); this.setPlayIcon();
+    if (a === "first") this.go(0);
+    if (a === "last") this.go(n - 1);
+    if (a === "prev") this.go(Math.max(0, this.k - 1));
+    if (a === "next") this.go(Math.min(n - 1, this.k + 1));
+  }
+  setPlayIcon() { const b = this.h.querySelector(".cbtn.play"); b.innerHTML = this.timer ? ICON.pause : ICON.play; b.setAttribute("aria-label", this.timer ? "Pause" : "Play"); }
+  play() {
+    this.timer = setInterval(() => {
+      if (!document.body.contains(this.h)) return this.stop();
+      if (this.k >= this.tr.s.length - 1) { this.stop(); this.setPlayIcon(); return; }
+      this.go(this.k + 1);
+    }, this.speed);
+    this.setPlayIcon();
+  }
+  go(k) {
+    this.k = k;
+    $("#scrub", this.h).value = String(k);
+    $("#stepn", this.h).textContent = `${k + 1} / ${this.tr.s.length}`;
+    this.renderStage();
+    this.renderCaption();
+    this.renderStack();
+    this.highlightLine();
+  }
+
+  /* ---------- caption ---------- */
+  renderCaption() {
+    const st = this.tr.s[this.k], prevSt = this.k > 0 ? this.tr.s[this.k - 1] : null;
+    const heap = this.heaps[this.k], pheap = this.k > 0 ? this.heaps[this.k - 1] : {};
+    const items = [];
+    const code = this.ap.code[this.vi].js.split("\n");
+    for (const e of st.e || []) {
+      if (e.k === "call") items.push(`Enter <code>${esc(e.fn)}</code>${e.a ? ` with ${esc(e.a)}` : ""}.`);
+      else if (e.k === "cmp") items.push(`Is <code>${esc(e.t)}</code>? Here that is ${esc(e.a)} ${esc(e.o)} ${esc(e.b)} → <span class="${e.r ? "yes" : "no"}">${e.r ? "yes" : "no"}</span>.`);
+      else if (e.k === "cond") items.push(`Check <code>${esc(e.t)}</code>${e.v !== undefined && e.v !== "true" && e.v !== "false" ? ` (value ${esc(e.v)})` : ""} → <span class="${e.r ? "yes" : "no"}">${e.r ? "yes" : "no"}</span>.`);
+      else if (e.k === "ret") items.push(`<code>${esc(e.fn)}</code> returns <b>${esc(e.v)}</b>.`);
+      else if (e.k === "back") items.push(e.v !== undefined ? `Back in <code>${esc(e.fn)}</code>: the call to <code>${esc(e.from)}</code> gave <b>${esc(e.v)}</b>.` : `Back in <code>${esc(e.fn)}</code>.`);
+      else if (e.k === "op") items.push(`Next operation: <code>${esc(e.t)}</code>.`);
+      else if (e.k === "res") items.push(`<code>${esc(e.t)}</code> gives <b>${esc(e.v)}</b>.`);
+    }
+    // variable changes in the top frame
+    if (prevSt) {
+      const fr = st.f[st.f.length - 1], pfr = prevSt.f[prevSt.f.length - 1];
+      const sameFrame = pfr && fr && pfr[0] === fr[0] && st.f.length === prevSt.f.length;
+      if (fr && sameFrame) {
+        const ch = [];
+        for (const [name, v] of Object.entries(fr[2])) {
+          if (name === "this") continue;
+          const pv = pfr[2][name];
+          if (!isRef(v)) {
+            if (!(name in pfr[2])) ch.push(`<code>${esc(name)}</code> starts at <b>${esc(primStr(v))}</b>`);
+            else if (JSON.stringify(pv) !== JSON.stringify(v)) ch.push(isRef(pv) ? `<code>${esc(name)}</code> is now <b>${esc(primStr(v))}</b>` : `<code>${esc(name)}</code> changes ${esc(primStr(pv))} → <b>${esc(primStr(v))}</b>`);
+          } else {
+            if (!(name in pfr[2]) || !isRef(pv)) ch.push(`<code>${esc(name)}</code> = ${esc(brief(v, heap))}`);
+            else if (pv.r !== v.r) ch.push(`<code>${esc(name)}</code> now points to ${esc(brief(v, heap))}`);
+            else ch.push(...this.describeObjChange(name, heap[v.r], pheap[v.r], heap, pheap));
+          }
+        }
+        items.push(...ch.slice(0, 4).map((x) => x + "."));
+      }
+    }
+    if (!items.length && st.l) items.push("This line runs. Nothing on the board changes value here.");
+    const ln = st.l ? code[st.l - 1] || "" : "";
+    const cm = ln.match(/\/\/\s*(.+)$/);
+    let html = st.l ? `<div class="lineno">Line ${st.l}: <code>${esc(ln.replace(/\/\/.*$/, "").trim().slice(0, 70))}</code></div>` : "";
+    if (cm) html += `<div class="say">“${esc(cm[1])}”</div>`;
+    html += `<ul>${items.map((x) => `<li>${x}</li>`).join("")}</ul>`;
+    if (this.k === this.tr.s.length - 1) {
+      const res = this.tr.res;
+      html += `<div class="done" style="margin-top:8px">${this.tr.t ? "Animation paused here." : "Done. Answer: " + esc(fmtResult(res))}</div>`;
+    }
+    $("#cap", this.h).innerHTML = html;
+  }
+  describeObjChange(name, o, po, heap, pheap) {
+    if (!o || !po) return [];
+    const out = [];
+    if (o.t === "a" && po.t === "a") {
+      const a = o.v, b = po.v;
+      if (a.length === b.length + 1 && b.every((x, i) => JSON.stringify(x) === JSON.stringify(a[i]))) return [`push ${esc(brief(a[a.length - 1], heap))} onto <code>${esc(name)}</code>`];
+      if (a.length + 1 === b.length && a.every((x, i) => JSON.stringify(x) === JSON.stringify(b[i]))) return [`pop ${esc(brief(b[b.length - 1], pheap))} off <code>${esc(name)}</code>`];
+      if (a.length + 1 === b.length && a.every((x, i) => JSON.stringify(x) === JSON.stringify(b[i + 1]))) return [`take ${esc(brief(b[0], pheap))} from the front of <code>${esc(name)}</code>`];
+      let n = 0;
+      for (let i = 0; i < Math.max(a.length, b.length); i++) {
+        if (JSON.stringify(a[i]) !== JSON.stringify(b[i])) {
+          if (n++ < 2) out.push(`<code>${esc(name)}[${i}]</code> ${i < b.length ? esc(cellText(b[i], pheap)) + " → " : "= "}<b>${esc(i < a.length ? cellText(a[i], heap) : "removed")}</b>`);
+        }
+      }
+      if (!n) { // nested change (2D)
+        for (let i = 0; i < a.length; i++) if (isRef(a[i]) && heap[a[i].r] !== pheap[a[i].r]) {
+          const r = this.describeObjChange(`${name}[${i}]`, heap[a[i].r], pheap[a[i].r], heap, pheap);
+          out.push(...r); if (out.length >= 2) break;
+        }
+      }
+      if (n > 2) out.push(`${n - 2} more cells of <code>${esc(name)}</code> change`);
+      return out;
+    }
+    if (o.t === "m" && po.t === "m") {
+      const pk = new Map(po.e.map(([k, v]) => [JSON.stringify(k), v]));
+      const nk = new Set(o.e.map(([k]) => JSON.stringify(k)));
+      for (const [k, v] of o.e) {
+        const kk = JSON.stringify(k);
+        if (!pk.has(kk)) out.push(`add ${esc(brief(k, heap, 2))} → ${esc(brief(v, heap, 1))} to <code>${esc(name)}</code>`);
+        else if (JSON.stringify(pk.get(kk)) !== JSON.stringify(v)) out.push(`<code>${esc(name)}</code>[${esc(brief(k, heap, 2))}] becomes ${esc(brief(v, heap, 1))}`);
+        else if (isRef(v) && heap[v.r] !== pheap[v.r]) out.push(`<code>${esc(name)}</code>[${esc(brief(k, heap, 2))}] is now ${esc(brief(v, heap, 1))}`);
+      }
+      for (const [k] of po.e) if (!nk.has(JSON.stringify(k))) out.push(`remove ${esc(brief(k, pheap, 2))} from <code>${esc(name)}</code>`);
+      return out.slice(0, 2);
+    }
+    if (o.t === "s" && po.t === "s") {
+      const ps = new Set(po.v.map((x) => JSON.stringify(x))), ns = new Set(o.v.map((x) => JSON.stringify(x)));
+      for (const x of o.v) if (!ps.has(JSON.stringify(x))) out.push(`add ${esc(brief(x, heap, 2))} to <code>${esc(name)}</code>`);
+      for (const x of po.v) if (!ns.has(JSON.stringify(x))) out.push(`remove ${esc(brief(x, pheap, 2))} from <code>${esc(name)}</code>`);
+      return out.slice(0, 2);
+    }
+    if (o.t === "o" && po.t === "o") {
+      for (const [k, v] of Object.entries(o.f)) {
+        const pv = po.f[k];
+        if (JSON.stringify(pv) !== JSON.stringify(v)) out.push(`<code>${esc(name)}.${esc(k)}</code> → ${esc(brief(v, heap, 1))}`);
+        else if (isRef(v) && heap[v.r] !== pheap[v.r] && !nodeKind(heap[v.r], heap)) out.push(...this.describeObjChange(name + "." + k, heap[v.r], pheap[v.r], heap, pheap));
+      }
+      return out.slice(0, 3);
+    }
+    return out;
+  }
+  renderStack() {
+    const st = this.tr.s[this.k];
+    const fr = st.f.filter((f) => f[0]);
+    const html = fr.slice(-6).map((f, i, a) => {
+      const hp = this.heaps[this.k];
+      const prims = Object.entries(f[2]).filter(([k]) => k !== "this").slice(0, 5).map(([k, v]) => `${k}=${isRef(v) ? brief(v, hp, 2) : primStr(v)}`).join(", ");
+      return `<div class="fr${i === a.length - 1 ? " top" : ""}">${esc(f[0])}(${esc(prims)})</div>`;
+    }).reverse().join("");
+    $("#cs", this.h).innerHTML = (fr.length > 6 ? `<div class="fr">… ${fr.length - 6} more below</div>` : "") + (html || `<div class="fr">—</div>`);
+    if (fr.length > 6) { const cs = $("#cs", this.h); cs.appendChild(cs.firstChild); }
+  }
+
+  /* ---------- stage ---------- */
+  renderStage() {
+    const stage = $("#stage", this.h);
+    const st = this.tr.s[this.k];
+    const heap = this.heaps[this.k], pheap = this.k > 0 ? this.heaps[this.k - 1] : heap;
+    const hints = this.tr.h || {};
+    const frames = st.f;
+    const top = frames[frames.length - 1] || ["", 0, {}];
+    const pst = this.k > 0 ? this.tr.s[this.k - 1] : null;
+    const ptop = pst ? pst.f[pst.f.length - 1] : null;
+    // remember old pointer / node positions for FLIP
+    const oldPos = {};
+    stage.querySelectorAll("[data-flip]").forEach((el) => { oldPos[el.dataset.flip] = el.style.left + "|" + el.style.top; });
+
+    // collect named refs from all frames (top frame names first for labels)
+    const owners = new Map(); // heap id -> [names]
+    const addOwner = (id, name, primary) => { if (!owners.has(id)) owners.set(id, []); const l = owners.get(id); if (!l.includes(name)) primary ? l.unshift(name) : l.push(name); };
+    const scalarVars = []; // [name, value, changed]
+    const ptrVars = {}; // name -> number (top frame + design object)
+    const lowNodes = new Set();
+    frames.forEach((f, fi) => {
+      const isTop = fi === frames.length - 1;
+      for (const [name, v] of Object.entries(f[2])) {
+        if (isRef(v) && !isTop && f[0] !== "" && heap[v.r] && nodeKind(heap[v.r], heap)) { lowNodes.add(v.r); continue; }
+        if (isRef(v)) addOwner(v.r, name === "this" ? "this" : name, isTop);
+        else if (isTop || f[0] === "") {
+          if (typeof v === "number") ptrVars[name] = v;
+          if (isTop) {
+            let changed = false, isNew = false;
+            if (ptop && ptop[0] === top[0] && pst.f.length === frames.length) {
+              if (!(name in ptop[2])) isNew = true;
+              else if (JSON.stringify(ptop[2][name]) !== JSON.stringify(v)) changed = true;
+            }
+            scalarVars.push([name, v, changed, isNew]);
+          }
+        }
+      }
+    });
+    // walk into class instances: their fields become their own panels, labelled obj.field
+    const objPanels = [];
+    const nodeLabels = new Map(); // node id -> names
+    const roots = []; // heap ids to draw as top-level panels
+    const seenPanels = new Set();
+    const nodes = { tree: new Set(), list: new Set(), graph: new Set(), trie: new Set() };
+    const visitForNodes = (id, depth, seen) => {
+      if (seen.has(id) || depth > 6) return; seen.add(id);
+      const o = heap[id]; if (!o) return;
+      const nk = nodeKind(o, heap);
+      if (nk) { nodes[nk].add(id); }
+      if (o.t === "a") o.v.forEach((x) => isRef(x) && visitForNodes(x.r, depth + (nk ? 0 : 1), seen));
+      else if (o.t === "m") o.e.forEach(([k, x]) => { isRef(k) && visitForNodes(k.r, depth + 1, seen); isRef(x) && visitForNodes(x.r, depth + 1, seen); });
+      else if (o.t === "s") o.v.forEach((x) => isRef(x) && visitForNodes(x.r, depth + 1, seen));
+      else if (o.t === "o") for (const [k, x] of Object.entries(o.f)) if (isRef(x)) visitForNodes(x.r, nk ? depth : depth + 1, seen);
+    };
+    const seenN = new Set();
+    for (const [id, names] of owners) {
+      visitForNodes(id, 0, seenN);
+      const o = heap[id];
+      if (o && nodeKind(o, heap)) { nodeLabels.set(id, names); continue; }
+      roots.push(id);
+    }
+    // names for nodes held in object fields (this.head etc.)
+    for (const id of roots) {
+      const o = heap[id];
+      if (o && o.t === "o") for (const [k, x] of Object.entries(o.f)) if (isRef(x) && heap[x.r] && nodeKind(heap[x.r], heap)) {
+        const l = nodeLabels.get(x.r) || []; const nm = (owners.get(id)[0] === "this" || owners.get(id)[0] === "obj" ? "" : owners.get(id)[0] + ".") + k; if (!l.includes(nm)) l.push(nm); nodeLabels.set(x.r, l);
+      }
+    }
+
+    let html = "";
+    // scalar variables
+    if (scalarVars.length) html += `<div class="vars">${scalarVars.map(([n, v, c, nw]) => `<span class="var${c ? " chg" : nw ? " new" : ""}"><b>${esc(n)}</b> = ${esc(primStr(v))}</span>`).join("")}</div>`;
+
+    for (const id of lowNodes) visitForNodes(id, 0, seenN);
+    const ctx = { heap, pheap, hints, ptrVars, nodeLabels, top, lowNodes };
+    // order panels stably by first appearance
+    for (const id of roots) if (!this.layoutOrder.has("p" + id)) this.layoutOrder.set("p" + id, this.layoutOrder.size);
+    roots.sort((a, b) => this.layoutOrder.get("p" + a) - this.layoutOrder.get("p" + b));
+    for (const id of roots) {
+      const names = owners.get(id);
+      html += this.panelHTML(id, names, ctx, 0);
+    }
+    // node diagrams
+    if (nodes.tree.size) html += this.treeHTML([...nodes.tree], ctx);
+    if (nodes.list.size) html += this.listHTML([...nodes.list], ctx);
+    if (nodes.trie.size) html += this.trieHTML([...nodes.trie], ctx);
+    if (nodes.graph.size) html += this.graphHTML([...nodes.graph], ctx);
+    if (!html) html = `<div class="empty">Nothing in memory yet.</div>`;
+    stage.innerHTML = html;
+    // place array pointers
+    stage.querySelectorAll(".arr").forEach((arr) => {
+      const cells = arr.querySelectorAll(".cells > .cell");
+      const ptrs = arr.querySelectorAll(".ptr");
+      const rows = {};
+      ptrs.forEach((p) => {
+        const i = +p.dataset.i;
+        let x;
+        if (i < 0) x = -16; else if (i >= cells.length) x = (cells.length ? cells[cells.length - 1].offsetLeft + cells[cells.length - 1].offsetWidth : 0) + 16;
+        else x = cells[i].offsetLeft + cells[i].offsetWidth / 2;
+        const key = Math.round(x);
+        rows[key] = (rows[key] || 0) + 1;
+        p.style.left = x + "px";
+        p.style.top = (rows[key] - 1) * 24 + "px";
+      });
+      const maxRow = Math.max(0, ...Object.values(rows));
+      const pr = arr.querySelector(".ptrs"); if (pr) pr.style.height = (maxRow ? maxRow * 24 : 0) + "px";
+    });
+    // FLIP animate
+    stage.querySelectorAll("[data-flip]").forEach((el) => {
+      const o = oldPos[el.dataset.flip];
+      if (!o) return;
+      const [l, t] = o.split("|");
+      const nl = el.style.left, nt = el.style.top;
+      if (l === nl && t === nt) return;
+      el.style.transition = "none"; el.style.left = l; if (t) el.style.top = t;
+      void el.offsetWidth;
+      el.style.transition = ""; el.style.left = nl; if (nt) el.style.top = nt;
+    });
+  }
+
+  ptrsFor(arrName, len, ctx, isStr) {
+    const out = [];
+    for (const [v, val] of Object.entries(ctx.ptrVars)) {
+      const h = ctx.hints[v];
+      if (!h || !Number.isInteger(val)) continue;
+      const kinds = h[arrName];
+      if (!kinds || kinds === "row" || kinds === "col") continue;
+      if (val < -1 || val > len) continue;
+      out.push([v, val]);
+    }
+    return out;
+  }
+  panelHTML(id, names, ctx, depth) {
+    const { heap, pheap } = ctx;
+    const o = heap[id], po = pheap[id];
+    if (!o) return "";
+    const changed = po !== o && JSON.stringify(po) !== JSON.stringify(o);
+    const nm = names[0];
+    const lab = `<div class="plabel"><b>${esc(names.join(" = "))}</b>${o.c ? `<em>${esc(o.c)}</em>` : ""}${o.t === "a" ? `<em>length ${o.n || o.v.length}</em>` : ""}${o.t === "m" || o.t === "s" ? `<em>size ${o.n || (o.e || o.v).length}</em>` : ""}</div>`;
+    let body = "";
+    const bareName = String(nm).replace(/^.*\./, "");
+    if (o.t === "a") body = this.arrayBody(id, bareName, ctx);
+    else if (o.t === "m") body = this.mapBody(id, ctx);
+    else if (o.t === "s") body = this.setBody(id, ctx);
+    else if (o.t === "o") {
+      const f = Object.entries(o.f);
+      const prims = f.filter(([, v]) => !isRef(v));
+      const refs = f.filter(([, v]) => isRef(v) && heap[v.r] && !nodeKind(heap[v.r], heap));
+      const nodeRefs = f.filter(([, v]) => isRef(v) && heap[v.r] && nodeKind(heap[v.r], heap));
+      body = `<div class="objf">`;
+      if (prims.length || nodeRefs.length) body += `<div class="vars" style="width:auto">${prims.map(([k, v]) => { const pv = po && po.f ? po.f[k] : undefined; return `<span class="var${po && JSON.stringify(pv) !== JSON.stringify(v) ? " chg" : ""}"><b>${esc(k)}</b> = ${esc(primStr(v))}</span>`; }).join("")}${nodeRefs.map(([k, v]) => `<span class="var"><b>${esc(k)}</b> → ${esc(brief(v, heap))}</span>`).join("")}</div>`;
+      for (const [k, v] of refs) {
+        if (depth > 2) { body += `<div class="sub"><div class="sublabel">${esc(k)}</div>${esc(brief(v, heap))}</div>`; continue; }
+        const sub = heap[v.r];
+        let inner = "";
+        if (sub.t === "a") inner = this.arrayBody(v.r, k, ctx);
+        else if (sub.t === "m") inner = this.mapBody(v.r, ctx);
+        else if (sub.t === "s") inner = this.setBody(v.r, ctx);
+        else inner = this.panelHTML(v.r, [k], ctx, depth + 1);
+        const subChg = pheap[v.r] !== sub && JSON.stringify(pheap[v.r]) !== JSON.stringify(sub);
+        body += `<div class="sub"><div class="sublabel" ${subChg ? 'style="color:var(--ink);font-weight:600"' : ""}>${esc(k)}${sub.t === "a" ? ` · ${sub.n || sub.v.length}` : ""}</div><div class="scroller">${inner}</div></div>`;
+      }
+      body += `</div>`;
+    }
+    return `<div class="panel${changed ? " chg" : ""}">${lab}<div class="scroller">${body}</div></div>`;
+  }
+  arrayBody(id, name, ctx) {
+    const { heap, pheap } = ctx;
+    const o = heap[id], po = pheap[id];
+    if (!o.v.length) return `<span class="empty">[ ] empty</span>`;
+    // 2-D grid of primitives
+    const rows = o.v.map((x) => (isRef(x) ? heap[x.r] : null));
+    if (rows.length && rows.every((r) => r && r.t === "a" && isPrimArr(r)) && rows.length <= 20 && Math.max(...rows.map((r) => r.v.length)) <= 26) {
+      return this.gridBody(id, name, ctx);
+    }
+    // string-array grid (e.g. board of strings) handled above; strings: arrays of single chars fine
+    const isStack = STACKY.test(name);
+    const ptrs = isStack ? [] : this.ptrsFor(name, o.v.length, ctx);
+    const win = this.windowRange(ptrs);
+    const cells = o.v.map((x, i) => {
+      const pv = po && po.t === "a" ? po.v[i] : undefined;
+      const chg = po && po.t === "a" && (i >= po.v.length || JSON.stringify(pv) !== JSON.stringify(x) || (isRef(x) && heap[x.r] !== pheap[x.r] && !nodeKind(heap[x.r], heap)));
+      const hit = ptrs.some((p) => p[1] === i);
+      const inWin = win && i >= win[0] && i <= win[1];
+      const t = cellText(x, heap);
+      return `<div class="cell${chg ? " chg" : ""}${hit ? " hit" : ""}${inWin ? " win" : ""}${x === null || (x && x.u) ? " dim" : ""}" title="${esc(name)}[${i}]">${esc(t.length > 26 ? t.slice(0, 25) + "…" : t)}${isStack ? "" : `<i class="ix">${i}</i>`}</div>`;
+    }).join("");
+    if (isStack) {
+      return `<div class="arr stack"><div class="topmark">top ↓</div><div class="cells">${cells}</div></div>`;
+    }
+    const more = o.n ? `<span class="empty"> … ${o.n - o.v.length} more</span>` : "";
+    return `<div class="arr"><div class="cells">${cells}</div>${more}<div class="ptrs">${ptrs.map(([n, i]) => `<span class="ptr${i < 0 || i >= o.v.length ? " off" : ""}" data-i="${i}" data-flip="${id}:${n}">${esc(n)}</span>`).join("")}</div></div>`;
+  }
+  windowRange(ptrs) {
+    const m = Object.fromEntries(ptrs);
+    for (const [a, b] of WINDOW_PAIRS) if (a in m && b in m && m[a] <= m[b]) return [m[a], m[b]];
+    return null;
+  }
+  gridBody(id, name, ctx) {
+    const { heap, pheap, hints, ptrVars } = ctx;
+    const o = heap[id], po = pheap[id];
+    const rows = o.v.map((x) => heap[x.r]);
+    const prow = po && po.t === "a" ? po.v.map((x) => (isRef(x) ? pheap[x.r] : null)) : [];
+    const cols = Math.max(...rows.map((r) => r.v.length));
+    // pointer pairs
+    const hits = [];
+    for (const [arr, rv, cv] of hints.__pairs || []) {
+      if (arr !== name) continue;
+      if (Number.isInteger(ptrVars[rv]) && Number.isInteger(ptrVars[cv])) hits.push([ptrVars[rv], ptrVars[cv], rv + "," + cv]);
+    }
+    let rowHl = -1, colHl = -1;
+    if (!hits.length) {
+      for (const [v, val] of Object.entries(ptrVars)) {
+        const h = hints[v] && hints[v][name];
+        if ((h === "row" || h === "idx") && Number.isInteger(val) && rowHl < 0) rowHl = val;
+        if (h === "col" && Number.isInteger(val) && colHl < 0) colHl = val;
+      }
+    }
+    const hitSet = new Set(hits.map((h) => h[0] + ":" + h[1]));
+    let t = `<table class="grid"><tr><th></th>${Array.from({ length: cols }, (_, j) => `<th>${j}</th>`).join("")}</tr>`;
+    rows.forEach((r, i) => {
+      t += `<tr><th>${i}</th>`;
+      for (let j = 0; j < cols; j++) {
+        const v = r.v[j];
+        const pv = prow[i] ? prow[i].v[j] : undefined;
+        const chg = po && prow[i] && JSON.stringify(pv) !== JSON.stringify(v);
+        const cls = [chg ? "chg" : "", hitSet.has(i + ":" + j) ? "hit" : "", i === rowHl ? "rowhl" : "", j === colHl ? "colhl" : ""].filter(Boolean).join(" ");
+        t += `<td class="${cls}">${v === undefined ? "" : esc(primStr(v, true))}</td>`;
+      }
+      t += `</tr>`;
+    });
+    t += `</table>`;
+    if (hits.length) t += `<div class="gptr">${hits.map((h) => `(${esc(h[2])}) = (${h[0]}, ${h[1]})`).join(" · ")}</div>`;
+    return t;
+  }
+  mapBody(id, ctx) {
+    const { heap, pheap } = ctx;
+    const o = heap[id], po = pheap[id];
+    if (!o.e.length) return `<span class="empty">{ } empty</span>`;
+    const pmap = new Map(po && po.t === "m" ? po.e.map(([k, v]) => [JSON.stringify(k), JSON.stringify(v) + (isRef(v) ? JSON.stringify(pheap[v.r]) : "")]) : []);
+    const rows = o.e.map(([k, v]) => {
+      const kk = JSON.stringify(k);
+      const now = JSON.stringify(v) + (isRef(v) ? JSON.stringify(heap[v.r]) : "");
+      const chg = po && (!pmap.has(kk) || pmap.get(kk) !== now);
+      return `<tr class="${chg ? "chg" : ""}"><td class="k">${esc(cellText(k, heap))}</td><td>${esc(brief(v, heap, 1))}</td></tr>`;
+    }).join("");
+    return `<table class="map">${rows}</table>${o.n ? `<div class="empty">… ${o.n - o.e.length} more</div>` : ""}`;
+  }
+  setBody(id, ctx) {
+    const { heap, pheap } = ctx;
+    const o = heap[id], po = pheap[id];
+    if (!o.v.length) return `<span class="empty">{ } empty</span>`;
+    const ps = new Set(po && po.t === "s" ? po.v.map((x) => JSON.stringify(x)) : []);
+    return `<div class="chips">${o.v.map((x) => `<span class="chip${po && !ps.has(JSON.stringify(x)) ? " chg" : ""}">${esc(cellText(x, heap))}</span>`).join("")}</div>`;
+  }
+
+  /* ---------- node diagrams ---------- */
+  nodeTags(id, ctx) {
+    const names = ctx.nodeLabels.get(id) || [];
+    return names.length ? `<span class="tags">${names.slice(0, 3).map((n) => `<span>${esc(n)}</span>`).join("")}</span>` : "";
+  }
+  nodeCls(id, ctx) { const on = (ctx.nodeLabels.get(+id) || []).length > 0; return (on ? " on" : ctx.lowNodes.has(+id) ? " stk" : "") + (this.nodeChanged(+id, ctx) ? " chg" : ""); }
+  nodeChanged(id, ctx) { const a = ctx.heap[id], b = ctx.pheap[id]; return b && a !== b && JSON.stringify(a) !== JSON.stringify(b); }
+  diagram(title, w, h, edgesSvg, nodesHtml, extra) {
+    return `<div class="panel"><div class="plabel"><b>${esc(title)}</b></div><div class="scroller"><div class="diagram" style="width:${w}px;height:${h}px"><svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah" style="fill:var(--faint);stroke:none"/></marker>
+      <marker id="ahh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--accent);stroke:none"/></marker>
+      <marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--med);stroke:none"/></marker></defs>
+      ${edgesSvg}</svg>${nodesHtml}${extra || ""}</div></div></div>`;
+  }
+  treeHTML(ids, ctx) {
+    const { heap } = ctx;
+    const set = new Set(ids);
+    const child = new Set();
+    for (const id of ids) { const f = heap[id].f; for (const k of ["left", "right"]) if (isRef(f[k]) && set.has(f[k].r)) child.add(f[k].r); }
+    let roots = ids.filter((id) => !child.has(id));
+    if (!roots.length) roots = [ids[0]];
+    // stable root order
+    for (const r of roots) if (!this.layoutOrder.has("t" + r)) this.layoutOrder.set("t" + r, this.layoutOrder.size);
+    roots.sort((a, b) => this.layoutOrder.get("t" + a) - this.layoutOrder.get("t" + b));
+    const pos = {};
+    let x = 0, maxD = 0;
+    const seen = new Set();
+    const walk = (id, d) => {
+      if (seen.has(id) || d > 12) return; seen.add(id);
+      const f = heap[id].f;
+      if (isRef(f.left) && heap[f.left.r]) walk(f.left.r, d + 1);
+      pos[id] = [x++, d]; maxD = Math.max(maxD, d);
+      if (isRef(f.right) && heap[f.right.r]) walk(f.right.r, d + 1);
+    };
+    for (const r of roots) { walk(r, 0); x += 0.6; }
+    const SX = 44, SY = 64, PX = 26, PY = 40;
+    const W = Math.max(80, Math.ceil(x * SX + PX)), H = (maxD + 1) * SY + PY - 10;
+    let edges = "", nodesH = "";
+    const P = (id) => [PX + pos[id][0] * SX, PY + pos[id][1] * SY];
+    for (const id of Object.keys(pos)) {
+      const f = heap[id].f, [x1, y1] = P(id);
+      const po = ctx.pheap[id];
+      for (const k of ["left", "right"]) if (isRef(f[k]) && pos[f[k].r]) {
+        const [x2, y2] = P(f[k].r);
+        const hot = po && po.f && JSON.stringify(po.f[k]) !== JSON.stringify(f[k]);
+        const a = Math.atan2(y2 - y1, x2 - x1);
+        edges += `<path class="${hot ? "hot" : ""}" d="M${x1 + 19 * Math.cos(a)} ${y1 + 19 * Math.sin(a)}L${x2 - 19 * Math.cos(a)} ${y2 - 19 * Math.sin(a)}"/>`;
+      }
+      nodesH += `<div class="node${this.nodeCls(id, ctx)}" data-flip="n${id}" style="left:${x1}px;top:${y1}px">${esc(nodeLabel(heap[id]))}${this.nodeTags(+id, ctx)}</div>`;
+    }
+    return this.diagram(ids.length > 1 ? "tree" : "node", W, H, edges, nodesH);
+  }
+  listHTML(ids, ctx) {
+    const { heap, pheap } = ctx;
+    const set = new Set(ids);
+    // stable grid positions (doubly linked lists are re-laid out every step)
+    const dbl = ids.some((id) => "prev" in heap[id].f);
+    const P = dbl ? {} : this.posMemo;
+    const taken = new Set(Object.values(P).map(([x, y]) => x + ":" + y));
+    const free = (x, y) => !taken.has(x + ":" + y);
+    const put = (id, x, y) => { P[id] = [x, y]; taken.add(x + ":" + y); };
+    let maxRow = Object.values(P).reduce((m, [, y]) => Math.max(m, y), -1);
+    const incoming = new Set();
+    for (const id of ids) { const f = heap[id].f; for (const k of ["next", "bottom"]) if (isRef(f[k])) incoming.add(f[k].r); }
+    const labelled = [...ctx.nodeLabels.keys()].filter((id) => set.has(id));
+    const starts = dbl ? ids.filter((id) => !incoming.has(id)).sort((a, b) => (labelled.includes(b) ? 1 : 0) - (labelled.includes(a) ? 1 : 0)).concat(ids) : labelled.concat(ids.filter((id) => !incoming.has(id)), ids);
+    for (const s of starts) {
+      if (P[s]) continue;
+      // chain start
+      let y = maxRow + 1, x = 0;
+      put(s, x, y); maxRow = Math.max(maxRow, y);
+      const q = [s];
+      while (q.length) {
+        const id = q.shift();
+        const f = heap[id].f;
+        const [cx, cy] = P[id];
+        if (isRef(f.next) && set.has(f.next.r) && !P[f.next.r]) {
+          let nx = cx + 1, ny = cy; while (!free(nx, ny)) ny++;
+          put(f.next.r, nx, ny); maxRow = Math.max(maxRow, ny); q.push(f.next.r);
+        }
+        if (isRef(f.bottom) && set.has(f.bottom.r) && !P[f.bottom.r]) {
+          let nx = cx, ny = cy + 1; while (!free(nx, ny)) nx++;
+          put(f.bottom.r, nx, ny); maxRow = Math.max(maxRow, ny); q.push(f.bottom.r);
+        }
+        if (isRef(f.child) && set.has(f.child.r) && !P[f.child.r]) {
+          let nx = cx, ny = cy + 1; while (!free(nx, ny)) nx++;
+          put(f.child.r, nx, ny); maxRow = Math.max(maxRow, ny); q.push(f.child.r);
+        }
+      }
+    }
+    const used = ids.filter((id) => P[id]);
+    const minY = Math.min(...used.map((id) => P[id][1]));
+    const ys = [...new Set(used.map((id) => P[id][1]))].sort((a, b) => a - b);
+    const yMap = Object.fromEntries(ys.map((y, i) => [y, i]));
+    const maxX = Math.max(...used.map((id) => P[id][0]));
+    const SX = 74, SY = 78, PX = 34, PY = 46;
+    const W = (maxX + 1) * SX + PX + 30, H = ys.length * SY + PY - 6;
+    const XY = (id) => [PX + P[id][0] * SX, PY + yMap[P[id][1]] * SY];
+    let edges = "", nodesH = "", extra = "";
+    const isD = used.some((id) => "prev" in heap[id].f);
+    for (const id of used) {
+      const f = heap[id].f, po = pheap[id];
+      const [x1, y1] = XY(id);
+      for (const k of ["next", "bottom", "child", "random"]) {
+        if (!(k in f)) continue;
+        const hot = po && po.f && JSON.stringify(po.f[k]) !== JSON.stringify(f[k]);
+        if (isRef(f[k]) && P[f[k].r] && set.has(f[k].r)) {
+          const [x2, y2] = XY(f[k].r);
+          let d;
+          if (k === "random") {
+            d = `M${x1} ${y1 + 19}C${x1} ${y1 + 50},${x2} ${y2 + 50},${x2 + 4} ${y2 + 20}`;
+          } else if (y1 === y2 && x2 === x1 + SX) d = `M${x1 + 23} ${y1 + (isD ? -5 : 0)}L${x2 - 23} ${y2 + (isD ? -5 : 0)}`;
+          else if (x1 === x2 && y2 === y1 + SY) d = `M${x1} ${y1 + 20}L${x2} ${y2 - 20}`;
+          else if (y1 === y2) { const up = x2 < x1 ? 1 : -1; d = `M${x1} ${y1 + 20 * up}C${x1} ${y1 + 55 * up},${x2} ${y2 + 55 * up},${x2} ${y2 + 20 * up}`; }
+          else { const a = Math.atan2(y2 - y1, x2 - x1); d = `M${x1 + 23 * Math.cos(a)} ${y1 + 20 * Math.sin(a)}L${x2 - 23 * Math.cos(a)} ${y2 - 20 * Math.sin(a)}`; }
+          edges += `<path class="${k === "random" ? "rnd" : hot ? "hot" : ""}" d="${d}" marker-end="url(#${k === "random" ? "ahr" : hot ? "ahh" : "ah"})"/>`;
+        } else if (f[k] === null && (k === "next") && hot) {
+          extra += `<span class="nullmark" style="left:${x1 + 40}px;top:${y1}px">∅</span>`;
+        }
+      }
+      if (isD && isRef(f.prev) && P[f.prev.r] && set.has(f.prev.r)) {
+        const [x2, y2] = XY(f.prev.r);
+        if (y1 === y2 && x2 === x1 - SX) edges += `<path d="M${x1 - 23} ${y1 + 5}L${x2 + 23} ${y2 + 5}" marker-end="url(#ah)"/>`;
+      }
+      if (f.next === null && !hasNullMarkDrawn(extra, x1, y1)) extra += `<span class="nullmark" style="left:${x1 + 38}px;top:${y1}px">∅</span>`;
+      nodesH += `<div class="node box${this.nodeCls(id, ctx)}${nodeLabel(heap[id]).length > 3 ? " wide" : ""}" data-flip="n${id}" style="left:${x1}px;top:${y1}px">${esc(nodeLabel(heap[id]))}${this.nodeTags(+id, ctx)}</div>`;
+    }
+    return this.diagram("linked nodes", W, H, edges, nodesH, extra);
+  }
+  trieChildren(o, heap) {
+    // returns [[label, id]]
+    const out = [];
+    const f = o.f;
+    let c = f.children || f.links || (isRef(f.next) && heap[f.next.r] && (heap[f.next.r].t === "m" || heap[f.next.r].t === "a" || (heap[f.next.r].t === "o" && !heap[f.next.r].c)) ? f.next : null);
+    if (c && isRef(c)) {
+      const co = heap[c.r];
+      if (!co) return out;
+      if (co.t === "a") co.v.forEach((x, i) => { if (isRef(x)) out.push([co.v.length === 26 ? String.fromCharCode(97 + i) : String(i), x.r]); });
+      else if (co.t === "m") co.e.forEach(([k, x]) => isRef(x) && out.push([primStr(k, true), x.r]));
+      else if (co.t === "o") Object.entries(co.f).forEach(([k, x]) => isRef(x) && out.push([k, x.r]));
+    } else {
+      Object.entries(f).forEach(([k, x]) => { if (k.length === 1 && isRef(x)) out.push([k, x.r]); });
+    }
+    return out;
+  }
+  trieHTML(ids, ctx) {
+    const { heap } = ctx;
+    const set = new Set(ids);
+    const child = new Set();
+    for (const id of ids) for (const [, c] of this.trieChildren(heap[id], heap)) child.add(c);
+    const roots = ids.filter((id) => !child.has(id));
+    const pos = {}; let x = 0, maxD = 0; const seen = new Set();
+    const walk = (id, d) => {
+      if (seen.has(id) || d > 14 || !heap[id]) return; seen.add(id);
+      const ch = this.trieChildren(heap[id], heap);
+      if (!ch.length) { pos[id] = [x++, d]; }
+      else { const before = x; ch.forEach(([, c]) => walk(c, d + 1)); const xs = ch.map(([, c]) => pos[c] && pos[c][0]).filter((v) => v !== undefined); pos[id] = [xs.length ? (Math.min(...xs) + Math.max(...xs)) / 2 : x++, d]; }
+      maxD = Math.max(maxD, d);
+    };
+    for (const r of roots) { walk(r, 0); x += 0.5; }
+    const SX = 40, SY = 58, PX = 24, PY = 30;
+    const W = Math.max(80, Math.ceil(x * SX + PX)), H = (maxD + 1) * SY + PY - 6;
+    const XY = (id) => [PX + pos[id][0] * SX, PY + pos[id][1] * SY];
+    let edges = "", nodesH = "";
+    for (const id of Object.keys(pos)) {
+      const o = heap[id]; const [x1, y1] = XY(id);
+      for (const [lab, c] of this.trieChildren(o, heap)) if (pos[c]) {
+        const [x2, y2] = XY(c);
+        const hot = !ctx.pheap[c];
+        edges += `<path class="${hot ? "hot" : ""}" d="M${x1} ${y1 + 14}L${x2} ${y2 - 14}"/><text x="${(x1 + x2) / 2 + 5}" y="${(y1 + y2) / 2 + 3}">${esc(lab)}</text>`;
+      }
+      const f = o.f;
+      const end = f.isEnd === true || f.end === true || f.isWord === true || (typeof f.word === "string") || f.$ === true || (typeof f.endCount === "number" && f.endCount > 0) || (typeof f.cntEndWith === "number" && f.cntEndWith > 0);
+      const cnt = typeof f.count === "number" ? f.count : typeof f.prefixCount === "number" ? f.prefixCount : typeof f.cntPrefix === "number" ? f.cntPrefix : "";
+      nodesH += `<div class="node${this.nodeCls(id, ctx)}${end ? " end" : ""}" data-flip="n${id}" style="left:${x1}px;top:${y1}px;width:28px;height:28px;margin:-14px 0 0 -14px;font-size:10px">${end ? "★" : esc(String(cnt))}${this.nodeTags(+id, ctx)}</div>`;
+    }
+    return this.diagram("trie  (★ = a word ends here)", W, H, edges, nodesH);
+  }
+  graphHTML(ids, ctx) {
+    const { heap } = ctx;
+    // components
+    const set = new Set(ids), comp = {}; let nc = 0;
+    for (const id of ids) {
+      if (comp[id] !== undefined) continue;
+      const q = [id]; comp[id] = nc;
+      while (q.length) { const u = q.shift(); const nb = heap[u].f.neighbors; const no = isRef(nb) ? heap[nb.r] : null; (no ? no.v : []).forEach((x) => { if (isRef(x) && set.has(x.r) && comp[x.r] === undefined) { comp[x.r] = nc; q.push(x.r); } }); }
+      nc++;
+    }
+    const R = 60, PX = 90, CW = 200;
+    const groups = {}; ids.forEach((id) => (groups[comp[id]] ||= []).push(id));
+    const XY = {};
+    Object.values(groups).forEach((g, gi) => {
+      g.sort((a, b) => +a - +b);
+      g.forEach((id, i) => { const a = -Math.PI / 2 + (2 * Math.PI * i) / g.length; XY[id] = [PX + gi * CW + R * Math.cos(a), 90 + R * Math.sin(a)]; });
+    });
+    let edges = "", nodesH = "";
+    const done = new Set();
+    for (const id of ids) {
+      const nb = heap[id].f.neighbors; const no = isRef(nb) ? heap[nb.r] : null;
+      for (const x of no ? no.v : []) if (isRef(x) && XY[x.r]) {
+        const key = [id, x.r].sort().join("-"); if (done.has(key)) continue; done.add(key);
+        const [x1, y1] = XY[id], [x2, y2] = XY[x.r];
+        edges += `<path d="M${x1} ${y1}L${x2} ${y2}"/>`;
+      }
+      const [x1, y1] = XY[id];
+      nodesH += `<div class="node${this.nodeCls(id, ctx)}" style="left:${x1}px;top:${y1}px">${esc(nodeLabel(heap[id]))}${this.nodeTags(+id, ctx)}</div>`;
+    }
+    return this.diagram("graph nodes", PX + nc * CW - 30, 180, edges, nodesH);
+  }
+}
+function hasNullMarkDrawn(extra, x, y) { return extra.includes(`left:${x + 40}px;top:${y}px`); }
+function fmtResult(r) {
+  if (r === null || r === undefined) return "null";
+  if (typeof r === "object" && !Array.isArray(r)) {
+    if (r.$list) return r.$list.join(" → ");
+    if (r.$tree) return "tree " + JSON.stringify(r.$tree);
+  }
+  const s = JSON.stringify(r);
+  return s && s.length > 200 ? s.slice(0, 200) + "…" : s;
+}
+
+/* ================= boot ================= */
+(async function () {
+  try { await loadIndex(); } catch (e) { $("#page").innerHTML = `<p class="loading">The book data did not load. Reload the page to try again.</p>`; return; }
+  renderRail("");
+  route();
+})();
+</script>
+
+</body></html>
